@@ -138,27 +138,29 @@ class Api {
     /**
      * Make json data format.
      *
-     * @param  mixed   $data
+     * @param  mixed   $content
      * @param  integer $code
      * @param  boolean $overwrite
      * @return string
      */
-    public function make($data, $code, $overwrite = false)
+    public function make($content, $code, $overwrite = false)
     {
         // Status returned.
         $status = (preg_match('/^(1|2|3)/', $code)) ? 'success' : 'error';
 
         // Change object to array.
-        if (is_object($data))
+        if (is_object($content))
         {
-            $data = $data->toArray();
+            $data = $content->toArray();
         }
-
-        // Data as a string.
-        if (is_string($data))
+        elseif (is_string($content))
         {
-            $data = array('message' => $data);
+			$data = array('message' => $content);
         }
+		elseif (is_array($content))
+		{
+			$data = $content;
+		}
 
         // Overwrite response format.
         if ($overwrite === true)
@@ -192,7 +194,7 @@ class Api {
                 $response = array_merge($response, $data);
             }
 
-            // Remove empty array.
+            // Remove empty elements
             $response = array_filter($response, function($value)
             {
                 return ! is_null($value);
@@ -203,12 +205,19 @@ class Api {
             {
                 unset($response['data']);
             }
+
+			// This array, which includes metadata as well as the raw content, can be accessed via getOriginalContent in ApiResponse
+			$original = array(
+				'ok'     	 => $status == 'success',
+				'code'       => $code,
+				'data'       => $content,
+			);
         }
 
         // Header response.
-        $header = ($this->config['httpResponse']) ? $code : 200;
+        $status = ($this->config['httpResponse']) ? $code : 200;
 
-        return Response::make($response, $header);
+		return new ApiResponse($original, $response, $status);
     }
 
     /**

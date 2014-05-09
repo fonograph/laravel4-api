@@ -157,7 +157,7 @@ class Api {
         {
 			$data = array('message' => $content);
         }
-		elseif (is_array($content))
+		else
 		{
 			$data = $content;
 		}

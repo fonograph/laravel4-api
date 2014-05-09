@@ -16,7 +16,7 @@ class ApiResponse extends Response
 
 	function __construct($originalContent, $arrayContent, $status = 200, array $headers = array())
 	{
-		$this->_original = $originalContent;
+		$this->_originalContent = $originalContent;
 
 		parent::__construct($arrayContent, $status, $headers);
 	}
